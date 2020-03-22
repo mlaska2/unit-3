@@ -70,6 +70,29 @@ window.onload = function() {
         }
     ];
 
+    //create linear scale for circle x position - operand of this is a generator (custom fucntion)
+    var x = d3.scaleLinear()
+        .range([90,750]) //output min and max
+        .domain([0,3]); //input min and max
+
+    //find minimum value of cityPop array
+    var minPop = d3.min(cityPop, function(d) {
+        return d.population;
+    });
+    //find maximum value of cityPop array
+    var maxPop = d3.max(cityPop, function(d) {
+        return d.population;
+    });
+    //create linear scale for circles center y coordinate
+    var y = d3.scaleLinear()
+        .range([450,50])
+        .domain([0, 700000]);
+    //color scale generator
+    var color = d3.scaleLinear()
+        .range(["#FDBE85", "#D94701"])
+        .domain([minPop, maxPop]);
+
+
     //block to create multiple, different circles at once using 3 methods supporting a join d3.selectAll, .data(), and .enter()
     var circles = container.selectAll(".circles") //create an empty selection
         .data(cityPop) //feed in the array of data
@@ -86,11 +109,70 @@ window.onload = function() {
             return Math.sqrt(area/Math.PI);
         })
         .attr("cx", function(d, i) {
-            //use index to place circles horizontally
-            return 90 + (i*180);
+            //use the scale generator with the index to place each circle horizontally
+            return x(i);
         })
         .attr("cy", function(d) {
             //subtract value from 450 to "grow" circles up from bottom instead of down from top of svg
-            return 450 - (d.population*0.0005);
+            return y(d.population);
         })
+        .style("fill", function(d,i) { //add fill color based on the color scale generator
+            return color(d.population);
+        })
+        .style("stroke", "#000"); //black circle stroke
+
+    //create y axis generator
+    var yAxis = d3.axisLeft(y);
+
+    //create axis g (group) element and add axis - creating new svg element to hold axis and append it to the container
+    var axis = container.append("g")
+        .attr("class", "axis")
+        .attr("transform", "translate(50,0)")
+        .call(yAxis);
+
+    //create text element and add the title
+    var title = container.append("text")
+        .attr("class", "title")
+        .attr("text-anchor", "middle")
+        .attr("x", 450)
+        .attr("y", 30)
+        .text("City Populations");
+
+    //create circle labels
+    var labels = container.selectAll(".labels")
+        .data(cityPop)
+        .enter()
+        .append("text")
+        .attr("class", "labels")
+        .attr("text-anchor", "left")
+        .attr("y", function(d) {
+            //vertical position centered on each circle
+            return y(d.population);
+        });
+
+    //create first line of labels
+    var nameLine = labels.append("tspan")
+        .attr("class", "nameLine")
+        .attr("x", function(d, i) {
+            //horizontal position to the right of each circle
+            return x(i) + Math.sqrt(d.population*0.01 / Math.PI) + 5;
+        })
+        .text(function(d) {
+            return d.city;
+        });
+
+    //create format generator
+    var format = d3.format(",");
+
+    //create second line of label
+    var popLine = labels.append("tspan")
+        .attr("class", "popLine")
+        .attr("x", function(d, i) {
+            //horizontal position to the right of each circle
+            return x(i) + Math.sqrt(d.population*0.01 / Math.PI) + 5;
+        })
+        .attr("dy", "15") //vertical offset of second line
+        .text(function(d) {
+            return "Pop. " + format(d.population); //use format generator to format numbers
+        });
 };
