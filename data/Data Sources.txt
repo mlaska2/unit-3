@@ -1,0 +1,7 @@
+Volume Index: https://ec.europa.eu/eurostat/statistics-explained/index.php/GDP_per_capita,_consumption_per_capita_and_price_level_indices#Relative_volumes_of_GDP_per_capita
+UR: https://ec.europa.eu/eurostat/statistics-explained/index.php/Unemployment_statistics#Unemployment_in_the_Member_States
+Life Expectancy: https://ec.europa.eu/eurostat/databrowser/view/sdg_03_10/default/table?lang=en
+GHG Emissions: https://ec.europa.eu/eurostat/databrowser/view/t2020_rd300/default/table?lang=en
+Nat. Debt: https://ec.europa.eu/eurostat/documents/2995521/9984123/2-19072019-AP-EN.pdf/437bbb45-7db5-4841-b104-296a0dfc2f1c
+Imports: https://ec.europa.eu/eurostat/databrowser/view/tet00004/default/table?lang=en
+Exports: https://ec.europa.eu/eurostat/databrowser/view/tet00003/default/table?lang=en
