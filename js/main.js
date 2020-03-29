@@ -5,8 +5,8 @@ window.onload = setMap();
 function setMap() {
 
     //map frame dimensions in webpage
-    var width = 960,
-        height = 460;
+    var width = 850,
+        height = 500;
 
     //create new svg container for the map in the webpage --map block to append svg container that will hold the map
     var laskaMap = d3.select("body")
@@ -18,10 +18,10 @@ function setMap() {
     //create Albers equal area conic - projection function - centered on EU (Gadheim, Germany) [9.9019, 49.8431] lon/lat
     var projection = d3.geoAlbers()
         //put center coordinates of chosen area as .center lat and .rotate lon
-        .center([0, 49.8431]) //keep .center lon at 0??
+        .center([0, 53]) //keep .center lon at 0??
         .rotate([-9.9019,0,0]) //keep .rotate lat at 0?? //possibly -9?
         .parallels([41, 65]) //standard parallels from projection wizard
-        .scale(650) //2500 = used in example, change based on your map
+        .scale(750) //2500 = used in example, change based on your map
         .translate([width/2, height/2]) // keep as half width and height of svg container to keep map centered in container
 
     //create - path generator - and save as variable path
