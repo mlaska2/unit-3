@@ -42,9 +42,9 @@ function setMap() {
         eUnion = data[2];
 
         //make sure data are loading correctly
-        // console.log(csvData);
+        //console.log(csvData);
         // console.log(world);
-        // console.log(euCountries);
+        // console.log(eUnion);
 
         //create graticule generator
         var graticule = d3.geoGraticule()
@@ -69,8 +69,36 @@ function setMap() {
             euCountries = topojson.feature(eUnion, eUnion.objects.euCountries).features; //add on .features because .data needs array as parameter, but topojson.feature turns topojson object to geojson FeatureCollection object. thus, for europeanUnion block to work, need to pull array of features out of FeatureCollection and pass it to .data()
 
         //examine results
-        console.log(worldCountries);
-        console.log(euCountries)
+        // console.log(worldCountries);
+        //console.log(euCountries)
+
+//start week 10 stuff
+        //variables for data join
+        var attrArray = ["Volume Index of GDP/Capita", "Unemployment Rate", "Life Expectancy", "GHG Emissions/Capita", "National Debt as % of GDP"];
+
+        //loop through csv to assign each set of csv attribute values to geojson region
+        for (var i=0; i<csvData.length; i++) {
+            var csvCountry = csvData[i]; //index of the current country
+            var csvKey = csvCountry.Country; //the csv primary key to be used for join
+
+            //loop through geojson countries to find correct country
+            for (var a=0; a<euCountries.length; a++) {
+
+                var geojsonProperties = euCountries[a].properties //the current countries geojson properties
+                var geojsonKey = geojsonProperties.Country //the geojson primary key to be used for the join, should be the same as csvKey
+
+                //where primary keys match, transfer csv data to geojson properties object
+                if (geojsonKey == csvKey) {
+                    attrArray.forEach(function(attr){
+                        var value = parseFloat(csvCountry[attr]); //get csv attribute value
+                        geojsonProperties[attr] = value; //assign attribute and value to geojson properties
+                    });
+                };
+            };
+        };
+        //console.log(euCountries)
+
+//end week 10 stuff
 
         //add world countries to map
         var countries = laskaMap.append("path")
