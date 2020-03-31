@@ -75,8 +75,11 @@ function setMap() {
         //join csv data to GeoJSON enumeration units
         euCountries = joinData(euCountries, csvData);
 
+        //create color scale
+        var colorScale = makeColorScale(csvData);
+
         //add enumeration units to the map
-        setEnumerationUnits(euCountries, laskaMap, path);
+        setEnumerationUnits(euCountries, laskaMap, path, colorScale);
     };
 }; //end of setMap function
 
@@ -102,12 +105,14 @@ function setGraticule(laskaMap, path) {
         .attr("d", path); //project graticule lines by putting in path generator
 };
 
+//function to?????
 function joinData(euCountries, csvData) {
 
     //loop through csv to assign each set of csv attribute values to geojson region
     for (var i=0; i<csvData.length; i++) {
         var csvCountry = csvData[i]; //index of the current country
         var csvKey = csvCountry.Country; //the csv primary key to be used for join
+        console.log(csvCountry)
 
         //loop through geojson countries to find correct country
         for (var a=0; a<euCountries.length; a++) {
@@ -131,7 +136,73 @@ function joinData(euCountries, csvData) {
 
 };
 
-function setEnumerationUnits(euCountries, laskaMap, path) {
+//function to create choropleth color scale generator
+function makeColorScale(data) {
+
+    var colorClasses = [ //pick own color scheme from colorbrewer
+       "#D4B9DA",
+       "#C994C7",
+       "#DF65B0",
+       "#DD1C77",
+       "#980043"
+    ];
+
+  //for quantile and equal interval
+    //create color scale generator
+    // var colorScale = d3.scaleQuantile()
+    //     .range(colorClasses);
+
+  //for quantile
+    // //build array of all values of the expressed attribute
+    // var domainArray=[];
+    // for (var i=0;i<data.length;i++) {
+    //     var value=parseFloat(data[i][expressedAttr]);
+    //     domainArray.push(value);
+    // };
+    //
+    // //assign array of expressed values as scale domain
+    // colorScale.domain(domainArray);
+
+  //for equal interval
+    // build ttwo value array of minimum and maximum expresed attribute values
+    // var minmax = [
+    //     d3.min(data, function(d) { return parseFloat(d[expressedAttr]); }),
+    //     d3.max(data, function(d) { return parseFloat(d[expressedAttr]); })
+    // ];
+    //
+    // //assign the two-value array as scale domain
+    // colorScale.domain(minmax);
+
+  //for natural breaks
+    //create color scale generator
+    var colorScale = d3.scaleThreshold()
+        .range(colorClasses);
+
+    //build array of all values of the expressed attribute
+    var domainArray=[];
+    for (var i=0; i<data.length; i++) {
+        var value = parseFloat(data[i][expressedAttr]);
+        domainArray.push(value);
+    };
+
+    //cluster data using ckmeans clustering algorith to create natural breaks
+    var clusters = ss.ckmeans(domainArray, 5);
+    //reset domain array to cluster minimums
+    domainArray = clusters.map(function(d) {
+        return d3.min(d);
+    });
+    //remove first value from domain array to create class breakpoints
+    domainArray.shift();
+
+    //assign array of last 4 cluster minimums as domain
+    colorScale.domain(domainArray);
+
+  //for all 3, return colorscale to function
+     return colorScale;
+};
+
+//function to???
+function setEnumerationUnits(euCountries, laskaMap, path, colorScale) {
 
     //add EU Countries to map - create enumeration units for choropleth. use select all,data,enter to draw each feature corresponding to a country separately
     var europeanUnion = laskaMap.selectAll(".europeanUnion")
@@ -142,6 +213,9 @@ function setEnumerationUnits(euCountries, laskaMap, path) {
             return "europeanUnion " + d.properties.Country;
         })
         .attr("d", path)
+        .style("fill", function(d) {
+            return colorScale(d.properties[expressedAttr])
+        });
 };
 
 })(); //last line of main.js, call the self-executing anonymous function

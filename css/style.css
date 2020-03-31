@@ -13,7 +13,8 @@
 .europeanUnion {
     fill: #FCC32D;
     stroke: #777;
-    stroke-width: 1px;
+    stroke-width: .75px;
+    stroke-linecap: round;
 }
 
 .gratLines {
