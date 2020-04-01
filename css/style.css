@@ -2,17 +2,29 @@
 
 .map {
     border: 3px solid #999;
+    margin: 10px 0 0 20px; /*top right bottom left*/
+}
+
+.chart {
+    border: 3px solid #999;
+    float: right;
+    margin: 10px 20px 0 0;
+    background-color: #DDD;
+}
+
+.bars {
+    border: 1px solid #777;
 }
 
 .countries {
-    fill: #EEE;
+    fill: #FAFAFA;
     stroke: #CCC;
     stroke-width: .75px;
 }
 
 .europeanUnion {
     fill: #FCC32D;
-    stroke: #777;
+    stroke: #555;
     stroke-width: .75px;
     stroke-linecap: round;
 }
