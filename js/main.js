@@ -14,7 +14,7 @@ window.onload = setMap();
 function setMap() {
 
     //map frame dimensions in webpage
-    var width = 850,
+    var width = window.innerWidth*.5,
         height = 500;
 
     //create new svg container for the map in the webpage --map block to append svg container that will hold the map
@@ -70,7 +70,7 @@ function setMap() {
         var countries = laskaMap.append("path")
             .datum(worldCountries)
             .attr("class", "countries")
-            .attr("d", path)
+            .attr("d", path);
 
         //join csv data to GeoJSON enumeration units
         euCountries = joinData(euCountries, csvData);
@@ -80,6 +80,9 @@ function setMap() {
 
         //add enumeration units to the map
         setEnumerationUnits(euCountries, laskaMap, path, colorScale);
+
+        //call function to add coordinated visualization to map
+        setChart(csvData, colorScale);
     };
 }; //end of setMap function
 
@@ -139,12 +142,12 @@ function joinData(euCountries, csvData) {
 //function to create choropleth color scale generator
 function makeColorScale(data) {
 
-    var colorClasses = [ //pick own color scheme from colorbrewer
-       "#D4B9DA",
-       "#C994C7",
-       "#DF65B0",
-       "#DD1C77",
-       "#980043"
+    var colorClasses = [ //pick own color scheme from colorbrewer - still needs adjusting
+       "#ECF7E1",
+       "#bae4bc",
+       "#7bccc4",
+       "#43a2ca",
+       "#0868ac"
     ];
 
   //for quantile and equal interval
@@ -215,6 +218,51 @@ function setEnumerationUnits(euCountries, laskaMap, path, colorScale) {
         .attr("d", path)
         .style("fill", function(d) {
             return colorScale(d.properties[expressedAttr])
+        });
+};
+
+//function to create coordinated bar chart
+function setChart(csvData, colorScale) {
+
+    //define chart frame dimesions in variables
+    var chartWidth = window.innerWidth*.425,
+        chartHeight = 500;
+
+    //create second svg element to hold bar chart
+    var chart = d3.select("body")
+        .append("svg")
+        .attr("width", chartWidth)
+        .attr("height", chartHeight)
+        .attr("class", "chart");
+
+    //create a scale to size bars proportionally to frame
+    var yScale = d3.scaleLinear()
+        .range([0,chartHeight])
+        .domain([0,300]);
+
+    //set bars for all EU countries
+    var bars = chart.selectAll(".bars")
+        .data(csvData)
+        .enter()
+        .append("rect")
+        .sort(function(a,b) {
+            return a[expressedAttr] - b[expressedAttr]
+        })
+        .attr("class", function(d) {
+            return "bars " + d.Country;
+        })
+        .attr("width", chartWidth/csvData.length - 1)
+        .attr("x", function(d, i) {
+            return i * (chartWidth/csvData.length);
+        })
+        .attr("height", function(d) {
+            return yScale(parseFloat(d[expressedAttr]));
+        })
+        .attr("y", function(d) {
+            return chartHeight - yScale(parseFloat(d[expressedAttr]));
+        })
+        .style("fill", function(d) {
+            return colorScale(d[expressedAttr]);
         });
 };
 
