@@ -6,15 +6,52 @@
 }
 
 .chart {
-    border: 3px solid #999;
+    /* border: 3px solid #999; only need these if doing non-axis graph*/
     float: right;
-    margin: 10px 20px 0 0;
-    background-color: #DDD;
+    margin: 7px 20px 0 0;
+    /* background-color: #EEE; */
+}
+
+.chartTitle {
+    font-family: sans-serif;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.chartBackground {
+    fill: #EEE;
+}
+
+.chartFrame {
+    fill: none;
+    stroke: #999;
+    stroke-width: 3px;
+    shape-rendering: crispEdges;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #999;
+    stroke-width: 1.5px;
+    shape-rendering: crispEdges;
+}
+
+.axis text {
+    font-family: sans-serif;
+    font-size: .85em;
+    fill: #777
 }
 
 .bars {
-    border: 1px solid #777;
+    stroke: #888;
+    stroke-width: .75px;
 }
+
+/* .numbers {
+    font-family: sans-serif;
+    font-size: 8px;
+} only need if doing non-axis graph*/
 
 .countries {
     fill: #FAFAFA;

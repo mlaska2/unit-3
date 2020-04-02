@@ -144,10 +144,10 @@ function makeColorScale(data) {
 
     var colorClasses = [ //pick own color scheme from colorbrewer - still needs adjusting
        "#ECF7E1",
-       "#bae4bc",
-       "#7bccc4",
-       "#43a2ca",
-       "#0868ac"
+       "#BAE4BC",
+       "#7BCCC4",
+       "#43A2CA",
+       "#0868AC"
     ];
 
   //for quantile and equal interval
@@ -226,7 +226,14 @@ function setChart(csvData, colorScale) {
 
     //define chart frame dimesions in variables
     var chartWidth = window.innerWidth*.425,
-        chartHeight = 500;
+        chartHeight = 513, //added 13 for space on top??
+        ///for adding in space for axis
+        leftPadding = 25,
+        rightPadding = 2,
+        topBottomPadding = 5,
+        chartInnerWidth = chartWidth - leftPadding - rightPadding,
+        chartInnerHeight = chartHeight - topBottomPadding*2,
+        translate  = "translate(" + leftPadding + "," + topBottomPadding + ")";
 
     //create second svg element to hold bar chart
     var chart = d3.select("body")
@@ -235,10 +242,18 @@ function setChart(csvData, colorScale) {
         .attr("height", chartHeight)
         .attr("class", "chart");
 
-    //create a scale to size bars proportionally to frame
+    /// triple '/' indicates steps for if doing axis for numbers
+    //create rectangle for chart background fill
+    var chartBackground = chart.append("rect")
+        .attr("class", "chartBackground")
+        .attr("width", chartInnerWidth)
+        .attr("height", chartInnerHeight)
+        .attr("transform", translate)
+
+    //create a scale to size bars proportionally to frame ///
     var yScale = d3.scaleLinear()
-        .range([0,chartHeight])
-        .domain([0,300]);
+        .range([503,0])   ///0,chartHeight for numbers and regular, 503,0 for axis??
+        .domain([0,280]);
 
     //set bars for all EU countries
     var bars = chart.selectAll(".bars")
@@ -246,24 +261,73 @@ function setChart(csvData, colorScale) {
         .enter()
         .append("rect")
         .sort(function(a,b) {
-            return a[expressedAttr] - b[expressedAttr]
+            return b[expressedAttr] - a[expressedAttr] ///switched b and a for axis steps
         })
         .attr("class", function(d) {
             return "bars " + d.Country;
         })
-        .attr("width", chartWidth/csvData.length - 1)
+        .attr("width", chartInnerWidth/csvData.length - 1) ///chartInnerWidth instead of chartWidth
         .attr("x", function(d, i) {
-            return i * (chartWidth/csvData.length);
+            return i * (chartInnerWidth/csvData.length) + leftPadding; /// before was chartWidth/csvData.length, but now this for w axis
         })
         .attr("height", function(d) {
-            return yScale(parseFloat(d[expressedAttr]));
+            return 503 - yScale(parseFloat(d[expressedAttr])); /// now "503 -" that, was just that
         })
         .attr("y", function(d) {
-            return chartHeight - yScale(parseFloat(d[expressedAttr]));
+            return yScale(parseFloat(d[expressedAttr])) + topBottomPadding; ///was: chartHeight - yScale(parseFloat(d[expressedAttr]))
         })
         .style("fill", function(d) {
             return colorScale(d[expressedAttr]);
         });
+
+    ///create vertical axis generator
+    var yAxis = d3.axisLeft()
+        .scale(yScale); ///this had to switch the range in yscale above to create this step here
+
+    ///place axis
+    var axis = chart.append("g")
+        .attr("class", "axis")
+        .attr("transform", translate)
+        .call(yAxis);
+
+    ///create frame for chart border
+    var chartFrame = chart.append("rect")
+        .attr("class", "chartFrame")
+        .attr("width", chartInnerWidth)
+        .attr("height", chartInnerHeight)
+        .attr("transform", translate);
+
+    //annotating bars with attribute value text - alot simpler than axis
+    // var numbers = chart.selectAll(".numbers")
+    //     .data(csvData)
+    //     .enter()
+    //     .append("text")
+    //     .sort(function(a,b) {
+    //         return b[expressedAttr] - a[expressedAttr];
+    //     })
+    //     .attr("class", function(d) {
+    //         return "numbers " + d.Country;
+    //     })
+    //     .attr("text-anchor", "middle")
+    //     .attr("x", function(d, i) {
+    //         var fraction = chartWidth / csvData.length;
+    //         return i*fraction + (fraction-1)/2;
+    //     })
+    //     .attr("y", function(d) {
+    //         return chartHeight - yScale(parseFloat(d[expressedAttr])) + 12;
+    //     })
+    //     .text(function(d) {
+    //         return d[expressedAttr]
+    //     });
+
+    //create text element for chart title
+    var chartTitle = chart.append("text")
+        .attr("x", chartInnerWidth/8)
+        .attr("y", 40)
+        .attr("class", "chartTitle")
+        .text(expressedAttr) //add 2nd line using <tspan> "in each European Union Country"??
+
+
 };
 
 })(); //last line of main.js, call the self-executing anonymous function
