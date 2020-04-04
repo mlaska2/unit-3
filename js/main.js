@@ -328,6 +328,6 @@ function setChart(csvData, colorScale) {
         .text(expressedAttr) //add 2nd line using <tspan> "in each European Union Country"??
 
 
-};
+}; 
 
 })(); //last line of main.js, call the self-executing anonymous function
