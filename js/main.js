@@ -20,7 +20,6 @@ var chartWidth = window.innerWidth*.425,
     chartInnerHeight = chartHeight - topBottomPadding*2,
     translate  = "translate(" + leftPadding + "," + topBottomPadding + ")";
 
-
 //create a scale to size bars proportionally to frame ///
 var yScale = d3.scaleLinear()
             .range([503,0])   ///0,chartHeight for numbers and regular, 503,0 for axis??
@@ -245,7 +244,8 @@ function setEnumerationUnits(euCountries, laskaMap, path, colorScale) {
         })
         .on("mouseout", function(d) {
             dehighlight(d.properties);
-        });
+        })
+        .on("mousemove", moveLabel);
 
     //add style descriptor to each path
     var desc = europeanUnion.append("desc")
@@ -283,7 +283,8 @@ function setChart(csvData, colorScale) {
         })
         .attr("width", chartInnerWidth/csvData.length - 1) ///chartInnerWidth instead of chartWidth
         .on("mouseover", highlight) //don't need to pass entire geojson through; here, using the csvData where the datum is already equivalent to the properties object in the GeoJSON
-        .on("mouseout", dehighlight);
+        .on("mouseout", dehighlight)
+        .on("mousemove", moveLabel);
         //add style descriptor to each rect
         var desc = bars.append("desc")
             .text('{"stroke": "#555", "stroke-width": "0.75px"}');
@@ -429,16 +430,19 @@ function highlight(props) { //props in the properties object of the selected ele
     var selected=d3.selectAll("." + props.Country)
         .style("stroke", "yellow")
         .style("stroke-width", "2");
+
+    //create label instantiation
+    setLabel(props);
 };
 
 //function to reset the element style on mouseout
 function dehighlight(props) {
     var selected = d3.selectAll("." + props.Country)
         .style("stroke", function() { //anon function here calls getStyle function below
-            return getStyle(this, "stroke") //could just do stroke here instead of anon function if enum and bar stroke were same
+            return getStyle(this, "stroke"); //could just do stroke here instead of anon function if enum and bar stroke were same
         })                                  //my stroke and stroke-width are the same for enum units and bars, jsut wanted experience coding like this
         .style("stroke-width", function() {
-            return getStyle(this, "stroke-width") //could just do stroke-width here instead of anon function if enum and bar stroke-width were same
+            return getStyle(this, "stroke-width"); //could just do stroke-width here instead of anon function if enum and bar stroke-width were same
         });
 
     //function to retrieve info stored in <desc> element for that style
@@ -451,6 +455,52 @@ function dehighlight(props) {
 
         return styleObject[styleName];
     };
+
+    //remove info label when mouseout
+    d3.select(".infoLabel")
+        .remove();
+};
+
+//function to create dynamic labels
+function setLabel(props) {
+    //label content
+    var labelAttribute = "<h1>" + props[expressedAttr] + "</h1><b>" + expressedAttr + "</b>";
+
+    //create info label div
+    var infoLabel = d3.select("body")
+        .append("div")
+        .attr("class", "infoLabel")
+        .attr("id", props.Country + "_label")
+        .html(labelAttribute)
+
+    var countryName = infoLabel.append("div")
+        .attr("class", "labelname")
+        .html(props.Country)
+};
+
+//function to move info label with mouse movement
+function moveLabel() {
+
+    //get width of label
+    var labelWidth = d3.select(".infoLabel")
+        .node()
+        .getBoundingClientRect()
+        .width;
+
+    //use coordinates of mousemove event to set label coordinates
+    var x1 = d3.event.clientX + 10,
+        y1 = d3.event.clientY - 75,
+        x2 = d3.event.clientX - labelWidth - 10,
+        y2 = d3.event.clientY + 25;
+
+    //horizontal label coordinate, testing for overflow
+    var x = d3.event.clientX > window.innerWidth - labelWidth - 20 ? x2 : x1;
+    //vertical label coordinate, testing for overflow
+    var y = d3.event.clientY < 75 ? y2 : y1;
+
+    d3.select(".infoLabel")
+        .style("left", x + "px")
+        .style("top", y + "px");
 };
 
 })(); //last line of main.js, call the self-executing anonymous function
