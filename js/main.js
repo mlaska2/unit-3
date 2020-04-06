@@ -1,11 +1,30 @@
 // Script by Matthew Laska; Unit 3 - D3 Lab; G575 Spring 2020
 
+//defining self-executing anonymous function to be able to define pseudo-global variables
 (function() {
 
-//pseudo-global variables
-    //variables for data join
+// defining pseudo-global variables
+
+//variables for data join
 var attrArray = ["Volume Index of GDP/Capita", "Unemployment Rate", "Life Expectancy", "GHG Emissions/Capita", "National Debt as % of GDP"];
 var expressedAttr = attrArray[0] //initial attribute
+
+//define chart frame dimesions in variables
+var chartWidth = window.innerWidth*.425,
+    chartHeight = 513, //added 13 for space on top??
+    ///for adding in space for axis
+    leftPadding = 25,
+    rightPadding = 2,
+    topBottomPadding = 5,
+    chartInnerWidth = chartWidth - leftPadding - rightPadding,
+    chartInnerHeight = chartHeight - topBottomPadding*2,
+    translate  = "translate(" + leftPadding + "," + topBottomPadding + ")";
+
+
+//create a scale to size bars proportionally to frame ///
+var yScale = d3.scaleLinear()
+            .range([503,0])   ///0,chartHeight for numbers and regular, 503,0 for axis??
+            .domain([0,280]); //need to change this for the different attributes, but how?????????????? just going to have to rescale w/in function by redfining yScale for each attribute??
 
 //begin script when window loads
 window.onload = setMap();
@@ -83,6 +102,8 @@ function setMap() {
 
         //call function to add coordinated visualization to map
         setChart(csvData, colorScale);
+
+        createDropdown(csvData);
     };
 }; //end of setMap function
 
@@ -217,23 +238,22 @@ function setEnumerationUnits(euCountries, laskaMap, path, colorScale) {
         })
         .attr("d", path)
         .style("fill", function(d) {
-            return colorScale(d.properties[expressedAttr])
+            return colorScale(d.properties[expressedAttr]);
+        })
+        .on("mouseover", function(d) {
+            highlight(d.properties); //need the anonymous function to call highlight() sothat the properties object can be passed to it without passing the whole GeoJSON feature
+        })
+        .on("mouseout", function(d) {
+            dehighlight(d.properties);
         });
+
+    //add style descriptor to each path
+    var desc = europeanUnion.append("desc")
+        .text('{"stroke": "#555", "stroke-width": "0.75px"}'); //change based on the stroke you have in style.css
 };
 
 //function to create coordinated bar chart
 function setChart(csvData, colorScale) {
-
-    //define chart frame dimesions in variables
-    var chartWidth = window.innerWidth*.425,
-        chartHeight = 513, //added 13 for space on top??
-        ///for adding in space for axis
-        leftPadding = 25,
-        rightPadding = 2,
-        topBottomPadding = 5,
-        chartInnerWidth = chartWidth - leftPadding - rightPadding,
-        chartInnerHeight = chartHeight - topBottomPadding*2,
-        translate  = "translate(" + leftPadding + "," + topBottomPadding + ")";
 
     //create second svg element to hold bar chart
     var chart = d3.select("body")
@@ -248,12 +268,7 @@ function setChart(csvData, colorScale) {
         .attr("class", "chartBackground")
         .attr("width", chartInnerWidth)
         .attr("height", chartInnerHeight)
-        .attr("transform", translate)
-
-    //create a scale to size bars proportionally to frame ///
-    var yScale = d3.scaleLinear()
-        .range([503,0])   ///0,chartHeight for numbers and regular, 503,0 for axis??
-        .domain([0,280]);
+        .attr("transform", translate);
 
     //set bars for all EU countries
     var bars = chart.selectAll(".bars")
@@ -267,18 +282,11 @@ function setChart(csvData, colorScale) {
             return "bars " + d.Country;
         })
         .attr("width", chartInnerWidth/csvData.length - 1) ///chartInnerWidth instead of chartWidth
-        .attr("x", function(d, i) {
-            return i * (chartInnerWidth/csvData.length) + leftPadding; /// before was chartWidth/csvData.length, but now this for w axis
-        })
-        .attr("height", function(d) {
-            return 503 - yScale(parseFloat(d[expressedAttr])); /// now "503 -" that, was just that
-        })
-        .attr("y", function(d) {
-            return yScale(parseFloat(d[expressedAttr])) + topBottomPadding; ///was: chartHeight - yScale(parseFloat(d[expressedAttr]))
-        })
-        .style("fill", function(d) {
-            return colorScale(d[expressedAttr]);
-        });
+        .on("mouseover", highlight) //don't need to pass entire geojson through; here, using the csvData where the datum is already equivalent to the properties object in the GeoJSON
+        .on("mouseout", dehighlight);
+        //add style descriptor to each rect
+        var desc = bars.append("desc")
+            .text('{"stroke": "#555", "stroke-width": "0.75px"}');
 
     ///create vertical axis generator
     var yAxis = d3.axisLeft()
@@ -325,9 +333,124 @@ function setChart(csvData, colorScale) {
         .attr("x", chartInnerWidth/8)
         .attr("y", 40)
         .attr("class", "chartTitle")
-        .text(expressedAttr) //add 2nd line using <tspan> "in each European Union Country"??
+        .text(expressedAttr); //add 2nd line using <tspan> "in each European Union Country"??
 
+    //call updateChart function to postion, size, and color the bars in the chart
+    updateChart(bars, csvData.length, colorScale)
+};
 
-}; 
+//function to create dropdown menu
+function createDropdown(csvData) {
+    //add select element
+    var dropdown = d3.select("body")
+        .append("select")
+        .attr("class", "dropdown")
+        .on("change", function() {
+            changeAttribute(this.value, csvData)
+        });
+
+    //add initial option
+    var titleOption = dropdown.append("option")
+        .attr("class", "titleOption")
+        .attr("disabled", "true")
+        .text("Select Attribute");
+
+    //add attribute name options
+    var attrOptions = dropdown.selectAll(".attrOptions")
+        .data(attrArray)
+        .enter()
+        .append("option")
+        .attr("value", function(d) { return d })
+        .text(function(d) { return d });
+};
+
+//dropdown change event listener handler
+function changeAttribute(attribute, csvData) {
+    //change the expressed attribute
+    expressedAttr = attribute;
+
+    //recreate the color scale
+    var colorScale = makeColorScale(csvData)
+
+    //recolor enumeration units
+    var europeanUnion = d3.selectAll(".europeanUnion")
+        //implement transitions
+        .transition()
+        .duration(1000)
+        //recolor the enumeration units
+        .style("fill", function(d) {
+            var value = d.properties[expressedAttr];
+            return colorScale(value);
+        });
+
+    //re-sort, resize, and recolor the bar chart bars
+    var bars = d3.selectAll(".bars")
+        //re-sort the bars
+        .sort(function(a, b) {
+            return b[expressedAttr] - a[expressedAttr];
+        })
+        //implement trastions on bars in chart
+        .transition()
+        .delay(function(d, i) { return i*30 })
+        .duration(500);
+
+    //call updateChart function to postion, size, and color the bars in the chart
+    updateChart(bars, csvData.length, colorScale)
+
+};
+
+//function to position, size, and color bars in the chart
+function updateChart(bars, n, colorScale) {
+    //position bars
+    bars.attr("x", function(d,i) {
+            return i* (chartInnerWidth/n) + leftPadding; /// before was chartWidth/csvData.length, but now this for w/ axis
+        })
+        //size or resize the bars
+        .attr("height", function(d,i) {
+            return 503 - yScale(parseFloat(d[expressedAttr]));  /// now "503 -" that, was just that
+        })
+        .attr("y", function(d,i) {
+            return yScale(parseFloat(d[expressedAttr])) + topBottomPadding; ///was: chartHeight - yScale(parseFloat(d[expressedAttr]))
+        })
+        //color or recolor the bars
+        .style("fill", function(d) {
+            var value = d[expressedAttr];
+            return colorScale(value);
+    });
+
+    var chartTitle = d3.select(".chartTitle")
+        .text(expressedAttr); //add 2nd line using <tspan> "in each European Union Country"??
+
+};
+
+//function to highlight enumeration units and bars
+function highlight(props) { //props in the properties object of the selected element from the GeoJSON data / attributes object from the CSV data, depending on if selected element is enumeration unit on the map or bar on the chart
+    //change stroke of selected feature
+    var selected=d3.selectAll("." + props.Country)
+        .style("stroke", "yellow")
+        .style("stroke-width", "2");
+};
+
+//function to reset the element style on mouseout
+function dehighlight(props) {
+    var selected = d3.selectAll("." + props.Country)
+        .style("stroke", function() { //anon function here calls getStyle function below
+            return getStyle(this, "stroke") //could just do stroke here instead of anon function if enum and bar stroke were same
+        })                                  //my stroke and stroke-width are the same for enum units and bars, jsut wanted experience coding like this
+        .style("stroke-width", function() {
+            return getStyle(this, "stroke-width") //could just do stroke-width here instead of anon function if enum and bar stroke-width were same
+        });
+
+    //function to retrieve info stored in <desc> element for that style
+    function getStyle(element, styleName) {
+        var styleText = d3.select(element)
+            .select("desc")
+            .text();
+
+        var styleObject = JSON.parse(styleText);
+
+        return styleObject[styleName];
+    };
+};
 
 })(); //last line of main.js, call the self-executing anonymous function
