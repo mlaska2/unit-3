@@ -67,7 +67,7 @@
 
 .infoLabel {
     position: absolute;
-    height: 50px;
+    height: 38px;
     min-width: 100px;
     color: #FFF;
     background-color: #000;
@@ -76,12 +76,12 @@
     top: -75px; /* adding default top style to hide label off page initially */
 }
 
-.infoLabel h1 {
+/* .infoLabel h1 {
     margin: 0 20px 0 0;
     padding: 0;
     display: inline-block;
     line-height: 1em;
-}
+} */
 
 /* .numbers {
     font-family: sans-serif;

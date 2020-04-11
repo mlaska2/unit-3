@@ -5,12 +5,11 @@
 
 // defining pseudo-global variables
 var csvData;
-var chart;
 var yAxis;
 var axis;
 
 //variables for data join
-var attrArray = ["Volume Index of GDP/Capita", "Unemployment Rate", "Life Expectancy", "GHG Emissions/Capita", "National Debt as % of GDP"];
+var attrArray = ["Volume Index of GDP/Capita", "Unemployment Rate (%)", "Life Expectancy (in Years)", "GHG Emissions/Capita (in Tons CO2e)", "National Debt as % of GDP", "Imports of Goods as % of GDP", "Exports of Goods as % of GDP"];
 var expressedAttr = attrArray[0] //initial attribute
 
 //define chart frame dimesions in variables
@@ -23,6 +22,12 @@ var chartWidth = window.innerWidth*.425,
     chartInnerWidth = chartWidth - leftPadding - rightPadding,
     chartInnerHeight = chartHeight - topBottomPadding*2,
     translate  = "translate(" + leftPadding + "," + topBottomPadding + ")";
+
+var chart = d3.select("body")
+    .append("svg")
+    .attr("width", chartWidth)
+    .attr("height", chartHeight)
+    .attr("class", "chart");
 
 //create a scale to size bars proportionally to frame ///
 var yScale = d3.scaleLinear()
@@ -104,7 +109,7 @@ function setMap() {
         setEnumerationUnits(euCountries, laskaMap, path, colorScale);
 
         //call function to add coordinated visualization to map
-        setChart(csvData, colorScale);
+        setChart(csvData, colorScale, chart);
 
         createDropdown(csvData);
     };
@@ -257,14 +262,7 @@ function setEnumerationUnits(euCountries, laskaMap, path, colorScale) {
 };
 
 //function to create coordinated bar chart
-function setChart(csvData, colorScale) {
-
-    //create second svg element to hold bar chart
-    var chart = d3.select("body")
-        .append("svg")
-        .attr("width", chartWidth)
-        .attr("height", chartHeight)
-        .attr("class", "chart");
+function setChart(csvData, colorScale, chart) {
 
     /// triple '/' indicates steps for if doing axis for numbers
     //create rectangle for chart background fill
@@ -293,15 +291,16 @@ function setChart(csvData, colorScale) {
         var desc = bars.append("desc")
             .text('{"stroke": "#555", "stroke-width": "0.75px"}');
 
-    ///create vertical axis generator
-    var yAxis = d3.axisLeft()
-        .scale(yScale); ///this had to switch the range in yscale above to create this step here
-
-    ///place axis
-    var axis = chart.append("g")
-        .attr("class", "axis")
-        .attr("transform", translate)
-        .call(yAxis);
+//can get rid of because now in updateChart function which gets called here??
+    // ///create vertical axis generator
+    // var yAxis = d3.axisLeft()
+    //     .scale(yScale); ///this had to switch the range in yscale above to create this step here
+    //
+    // ///place axis
+    // var axis = chart.append("g")
+    //     .attr("class", "axis")
+    //     .attr("transform", translate)
+    //     .call(yAxis);
 
     ///create frame for chart border
     var chartFrame = chart.append("rect")
@@ -396,8 +395,9 @@ function changeAttribute(attribute, csvData) {
         })
         //implement trastions on bars in chart
         .transition()
-        .delay(function(d, i) { return i*30 })
-        .duration(500);
+        .delay(function(d, i) { return i*25 })
+        .duration(675)
+        .ease(d3.easeExpOut);
 
     //call updateChart function to postion, size, and color the bars in the chart
     updateChart(bars, csvData.length, colorScale, csvData, chart)
@@ -489,7 +489,7 @@ function dehighlight(props) {
 //function to create dynamic labels
 function setLabel(props) {
     //label content
-    var labelAttribute = "<h1>" + props[expressedAttr] + "</h1><b>" + expressedAttr + "</b>";
+    var labelAttribute = "<b>" + props.Country + ": " + props[expressedAttr] + "</b>";
 
     //create info label div
     var infoLabel = d3.select("body")
@@ -498,9 +498,9 @@ function setLabel(props) {
         .attr("id", props.Country + "_label")
         .html(labelAttribute)
 
-    var countryName = infoLabel.append("div")
+    var indicatorName = infoLabel.append("div")
         .attr("class", "labelname")
-        .html(props.Country)
+        .html(expressedAttr)
 };
 
 //function to move info label with mouse movement
@@ -514,14 +514,14 @@ function moveLabel() {
 
     //use coordinates of mousemove event to set label coordinates
     var x1 = d3.event.clientX + 10,
-        y1 = d3.event.clientY - 75,
+        y1 = d3.event.clientY - 60,
         x2 = d3.event.clientX - labelWidth - 10,
         y2 = d3.event.clientY + 25;
 
     //horizontal label coordinate, testing for overflow
     var x = d3.event.clientX > window.innerWidth - labelWidth - 20 ? x2 : x1;
     //vertical label coordinate, testing for overflow
-    var y = d3.event.clientY < 75 ? y2 : y1;
+    var y = d3.event.clientY < 60 ? y2 : y1;
 
     d3.select(".infoLabel")
         .style("left", x + "px")
