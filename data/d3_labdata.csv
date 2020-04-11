@@ -1,4 +1,4 @@
-﻿Country,Latitude,Longitude,Volume Index of GDP/Capita,Unemployment Rate,Life Expectancy,GHG Emissions/Capita,National Debt as % of GDP,Imports of Goods as % of GDP,Exports of Goods as % of GDP
+﻿Country,Latitude,Longitude,Volume Index of GDP/Capita,Unemployment Rate (%),Life Expectancy (in Years),GHG Emissions/Capita (in Tons CO2e),National Debt as % of GDP,Imports of Goods as % of GDP,Exports of Goods as % of GDP
 Austria,47.522617,14.143702,127,4.2,81.7,9.6,72.7,52.1,55.7
 Belgium,50.780688,4.792712,117,5.2,81.6,10.5,105.1,81.6,81.6
 Bulgaria,42.501868,25.176846,51,4.2,74.8,8.8,21.2,60.1,63.6

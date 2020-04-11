@@ -5,12 +5,11 @@
 
 // defining pseudo-global variables
 var csvData;
-var chart;
 var yAxis;
 var axis;
 
 //variables for data join
-var attrArray = ["Volume Index of GDP/Capita", "Unemployment Rate", "Life Expectancy", "GHG Emissions/Capita", "National Debt as % of GDP"];
+var attrArray = ["Volume Index of GDP/Capita", "Unemployment Rate (%)", "Life Expectancy (in Years)", "GHG Emissions/Capita (in Tons CO2e)", "National Debt as % of GDP", "Imports of Goods as % of GDP", "Exports of Goods as % of GDP"];
 var expressedAttr = attrArray[0] //initial attribute
 
 //define chart frame dimesions in variables
@@ -23,6 +22,12 @@ var chartWidth = window.innerWidth*.425,
     chartInnerWidth = chartWidth - leftPadding - rightPadding,
     chartInnerHeight = chartHeight - topBottomPadding*2,
     translate  = "translate(" + leftPadding + "," + topBottomPadding + ")";
+
+var chart = d3.select("body")
+    .append("svg")
+    .attr("width", chartWidth)
+    .attr("height", chartHeight)
+    .attr("class", "chart");
 
 //create a scale to size bars proportionally to frame ///
 var yScale = d3.scaleLinear()
@@ -104,7 +109,7 @@ function setMap() {
         setEnumerationUnits(euCountries, laskaMap, path, colorScale);
 
         //call function to add coordinated visualization to map
-        setChart(csvData, colorScale);
+        setChart(csvData, colorScale, chart);
 
         createDropdown(csvData);
     };
@@ -257,14 +262,14 @@ function setEnumerationUnits(euCountries, laskaMap, path, colorScale) {
 };
 
 //function to create coordinated bar chart
-function setChart(csvData, colorScale) {
+function setChart(csvData, colorScale, chart) {
 
     //create second svg element to hold bar chart
-    var chart = d3.select("body")
-        .append("svg")
-        .attr("width", chartWidth)
-        .attr("height", chartHeight)
-        .attr("class", "chart");
+    // var chart = d3.select("body")
+    //     .append("svg")
+    //     .attr("width", chartWidth)
+    //     .attr("height", chartHeight)
+    //     .attr("class", "chart");
 
     /// triple '/' indicates steps for if doing axis for numbers
     //create rectangle for chart background fill
