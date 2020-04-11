@@ -65,6 +65,23 @@
     font-weight: normal;
 }
 
+.legendContainer {
+    margin-left: 20px;
+    width: 550px;
+    height: 80px;
+    border: 3px solid #999;
+}
+
+.label{
+    opacity: .67 ;
+}
+
+.legendTitle{
+    fill:#000;
+    font-weight: bold;
+    font-size: 1.25em;
+}
+
 .infoLabel {
     position: absolute;
     height: 38px;

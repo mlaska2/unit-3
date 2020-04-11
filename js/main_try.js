@@ -7,6 +7,14 @@
 var csvData;
 var yAxis;
 var axis;
+var legendClasses;
+var colorClasses = [ //pick own color scheme from colorbrewer - still needs adjusting
+   "#ECF7E1",
+   "#BAE4BC",
+   "#7BCCC4",
+   "#43A2CA",
+   "#0868AC"
+];
 
 //variables for data join
 var attrArray = ["Volume Index of GDP/Capita", "Unemployment Rate (%)", "Life Expectancy (in Years)", "GHG Emissions/Capita (in Tons CO2e)", "National Debt as % of GDP", "Imports of Goods as % of GDP", "Exports of Goods as % of GDP"];
@@ -111,7 +119,10 @@ function setMap() {
         //call function to add coordinated visualization to map
         setChart(csvData, colorScale, chart);
 
+        //function to create dropdown menu and add to map
         createDropdown(csvData);
+
+        createLegend(csvData, expressedAttr);
     };
 }; //end of setMap function
 
@@ -225,6 +236,10 @@ function makeColorScale(data) {
     });
     //remove first value from domain array to create class breakpoints
     domainArray.shift();
+
+    legendClasses = clusters.map(function(d) {
+        return d3.max(d);
+    });
 
     //assign array of last 4 cluster minimums as domain
     colorScale.domain(domainArray);
@@ -400,7 +415,10 @@ function changeAttribute(attribute, csvData) {
         .ease(d3.easeExpOut);
 
     //call updateChart function to postion, size, and color the bars in the chart
-    updateChart(bars, csvData.length, colorScale, csvData, chart)
+    updateChart(bars, csvData.length, colorScale, csvData, chart);
+
+    d3.select("svg.legendContainer").remove();
+    createLegend(csvData, expressedAttr);
 
 };
 
@@ -526,6 +544,41 @@ function moveLabel() {
     d3.select(".infoLabel")
         .style("left", x + "px")
         .style("top", y + "px");
+};
+
+function createLegend(csvData, expressedAttr) {
+
+    //helpful resource: https://d3-legend.susielu.com/
+
+    //create labels for legend using color scale
+    var legendScale = d3.scaleThreshold()
+        .domain(legendClasses)
+        .range(colorClasses);
+
+    //add svg element to body for legend
+    legendContainer = d3.select("body")
+        .append("svg")
+        .attr("class", "legendContainer");
+
+    //add group elements to container to hold legend items
+    var legend = d3.select(".legendContainer")
+
+    legend.append("g")
+        .attr("class", "legend")
+        .attr("transform", "translate(20,20)"); //look into this more/change it
+
+    var colorLegend = d3.legendColor()
+        //.labelFormat(d3.format(".2f"))
+        .shapeWidth(100)
+        .orient("horizontal")
+        .scale(legendScale)
+        .title(expressedAttr)
+        .labels(d3.legendHelpers.thresholdLabels);
+
+    legend.select(".legend")
+        .call(colorLegend);
+
+    console.log("legend created");
 };
 
 })(); //last line of main.js, call the self-executing anonymous function
