@@ -1,15 +1,44 @@
 /* Script by Matthew Laska; Unit 3 - D3 Lab; G575 Spring 2020 */
 
+.titleSection {
+    /* float: right; */
+    position: absolute;
+    right: 3%;
+    text-align: center;
+}
+
+/* .title{
+    position: absolute;
+    fill: #000;
+    font-weight: bold;
+    font-size: 2em;
+} */
+
+.metadata {
+    /* position: absolute; */
+    color: #999;
+    font-size: .8em;
+}
+
+/* .econTitle {
+    float: right;
+    position: absolute;
+    padding-left: 10px;
+} */
+
 .map {
     border: 3px solid #999;
-    margin: 10px 0 0 20px; /*top right bottom left*/
+    margin: 10px 0 10px 20px; /*top right bottom left*/
+    top: 100px;
+    position: absolute;
 }
 
 .chart {
     /* border: 3px solid #999; only need these if doing non-axis graph*/
     float: right;
-    margin: 7px 20px 0 0;
-    /* background-color: #EEE; */
+    margin: 0 20px 0 0;
+    top: 100px;
+    position: relative;
 }
 
 .chartTitle {
@@ -50,7 +79,7 @@
 
 .dropdown {
     position: absolute;
-    top: 30px;
+    top: 120px;
     left: 40px;
     z-index: 10;
     font-family: sans-serif;
@@ -67,8 +96,7 @@
 
 .legendContainer {
     margin-left: 20px;
-    width: 550px;
-    height: 80px;
+    height: 90px;
     border: 3px solid #999;
 }
 
@@ -80,6 +108,7 @@
     fill:#000;
     font-weight: bold;
     font-size: 1.25em;
+    font-family: sans-serif;
 }
 
 .infoLabel {

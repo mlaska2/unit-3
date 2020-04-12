@@ -22,7 +22,7 @@ var expressedAttr = attrArray[0] //initial attribute
 
 //define chart frame dimesions in variables
 var chartWidth = window.innerWidth*.425,
-    chartHeight = 513, //added 13 for space on top??
+    chartHeight = 503, //added 13 for space on top??
     ///for adding in space for axis
     leftPadding = 25,
     rightPadding = 2,
@@ -39,7 +39,7 @@ var chart = d3.select("body")
 
 //create a scale to size bars proportionally to frame ///
 var yScale = d3.scaleLinear()
-            .range([503,0])   ///0,chartHeight for numbers and regular, 503,0 for axis??
+            .range([493,0])   ///0,chartHeight for numbers and regular, 503,0 for axis??
             .domain([0,280]); //need to change this for the different attributes, but how?????????????? just going to have to rescale w/in function by redfining yScale for each attribute??
 
 //begin script when window loads
@@ -50,7 +50,7 @@ function setMap() {
 
     //map frame dimensions in webpage
     var width = window.innerWidth*.5,
-        height = 500;
+        height = 490;
 
     //create new svg container for the map in the webpage --map block to append svg container that will hold the map
     var laskaMap = d3.select("body")
@@ -122,6 +122,7 @@ function setMap() {
         //function to create dropdown menu and add to map
         createDropdown(csvData);
 
+        //function to create choropleth legend
         createLegend(csvData, expressedAttr);
     };
 }; //end of setMap function
@@ -148,7 +149,7 @@ function setGraticule(laskaMap, path) {
         .attr("d", path); //project graticule lines by putting in path generator
 };
 
-//function to?????
+//function to join data from .csv to .GeoJSON
 function joinData(euCountries, csvData) {
 
     //loop through csv to assign each set of csv attribute values to geojson region
@@ -430,7 +431,7 @@ function updateChart(bars, n, colorScale, csvData, chart) {
 
     //define new scaling values for the bars
     yScale
-        .range([503,0])
+        .range([493,0])
         .domain([0, d3.max(csvData, function(d) {
             return parseFloat(d[expressedAttr]) * 1.1;
         })]);
@@ -451,7 +452,7 @@ function updateChart(bars, n, colorScale, csvData, chart) {
         })
         //size or resize the bars
         .attr("height", function(d,i) {
-            return 503 - yScale(parseFloat(d[expressedAttr]));  /// now "503 -" that, was just that
+            return 493 - yScale(parseFloat(d[expressedAttr]));  /// now "503 -" that, was just that
         })
         .attr("y", function(d,i) {
             return yScale(parseFloat(d[expressedAttr])) + topBottomPadding; ///was: chartHeight - yScale(parseFloat(d[expressedAttr]))
@@ -558,6 +559,7 @@ function createLegend(csvData, expressedAttr) {
     //add svg element to body for legend
     legendContainer = d3.select("body")
         .append("svg")
+        .attr("width", window.innerWidth*.43)
         .attr("class", "legendContainer");
 
     //add group elements to container to hold legend items
@@ -569,7 +571,7 @@ function createLegend(csvData, expressedAttr) {
 
     var colorLegend = d3.legendColor()
         //.labelFormat(d3.format(".2f"))
-        .shapeWidth(100)
+        .shapeWidth(window.innerWidth*.078)
         .orient("horizontal")
         .scale(legendScale)
         .title(expressedAttr)
@@ -580,5 +582,23 @@ function createLegend(csvData, expressedAttr) {
 
     console.log("legend created");
 };
+
+//failed attempt at making a title , everytime I changed a varible in the dropdown the svg would shift from the top right corner to the top left corner
+    //and also I just wasn't able to postion anything properly on the page, as well as not being able to add more than 1 line of text
+// function createTitle() {
+//
+//     var econTitle = d3.select("body")
+//         .append("svg")
+//         .attr("width", window.innerWidth * .5)
+//         .attr("height", 100)
+//         .attr("class", "econTitle")
+//
+//     var title = econTitle.append("text")
+//         .attr("x", 20)
+//         .attr("y", "50%")
+//         .attr("class", "title")
+//         .text("Economic Indicators in the European Union")
+// };
+
 
 })(); //last line of main.js, call the self-executing anonymous function
