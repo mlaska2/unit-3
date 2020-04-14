@@ -5,19 +5,19 @@
     position: absolute;
     right: 3%;
     text-align: center;
+    width: 50%;
 }
 
-/* .title{
-    position: absolute;
-    fill: #000;
-    font-weight: bold;
-    font-size: 2em;
-} */
+.title h2{
+    width: 100%;
+    margin-block-end: 0px;
+}
 
 .metadata {
     /* position: absolute; */
     color: #999;
     font-size: .8em;
+    width: 100%
 }
 
 /* .econTitle {
@@ -101,7 +101,8 @@
 }
 
 .label{
-    opacity: .67 ;
+    opacity: .67;
+    font-size: .8em;
 }
 
 .legendTitle{

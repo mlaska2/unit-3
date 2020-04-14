@@ -7,14 +7,6 @@
 var csvData;
 var yAxis;
 var axis;
-var legendClasses;
-var colorClasses = [ //pick own color scheme from colorbrewer - still needs adjusting
-   "#ECF7E1",
-   "#BAE4BC",
-   "#7BCCC4",
-   "#43A2CA",
-   "#0868AC"
-];
 
 //variables for data join
 var attrArray = ["Volume Index of GDP/Capita", "Unemployment Rate (%)", "Life Expectancy (in Years)", "GHG Emissions/Capita (in Tons CO2e)", "National Debt as % of GDP", "Imports of Goods as % of GDP", "Exports of Goods as % of GDP"];
@@ -22,7 +14,7 @@ var expressedAttr = attrArray[0] //initial attribute
 
 //define chart frame dimesions in variables
 var chartWidth = window.innerWidth*.425,
-    chartHeight = 503, //added 13 for space on top??
+    chartHeight = 513, //added 13 for space on top??
     ///for adding in space for axis
     leftPadding = 25,
     rightPadding = 2,
@@ -39,7 +31,7 @@ var chart = d3.select("body")
 
 //create a scale to size bars proportionally to frame ///
 var yScale = d3.scaleLinear()
-            .range([493,0])   ///0,chartHeight for numbers and regular, 503,0 for axis??
+            .range([503,0])   ///0,chartHeight for numbers and regular, 503,0 for axis??
             .domain([0,280]); //need to change this for the different attributes, but how?????????????? just going to have to rescale w/in function by redfining yScale for each attribute??
 
 //begin script when window loads
@@ -50,7 +42,7 @@ function setMap() {
 
     //map frame dimensions in webpage
     var width = window.innerWidth*.5,
-        height = 490;
+        height = 500;
 
     //create new svg container for the map in the webpage --map block to append svg container that will hold the map
     var laskaMap = d3.select("body")
@@ -119,11 +111,7 @@ function setMap() {
         //call function to add coordinated visualization to map
         setChart(csvData, colorScale, chart);
 
-        //function to create dropdown menu and add to map
         createDropdown(csvData);
-
-        //function to create choropleth legend
-        createLegend(csvData, expressedAttr);
     };
 }; //end of setMap function
 
@@ -149,7 +137,7 @@ function setGraticule(laskaMap, path) {
         .attr("d", path); //project graticule lines by putting in path generator
 };
 
-//function to join data from .csv to .GeoJSON
+//function to?????
 function joinData(euCountries, csvData) {
 
     //loop through csv to assign each set of csv attribute values to geojson region
@@ -237,10 +225,6 @@ function makeColorScale(data) {
     });
     //remove first value from domain array to create class breakpoints
     domainArray.shift();
-
-    legendClasses = clusters.map(function(d) {
-        return d3.max(d);
-    });
 
     //assign array of last 4 cluster minimums as domain
     colorScale.domain(domainArray);
@@ -416,10 +400,7 @@ function changeAttribute(attribute, csvData) {
         .ease(d3.easeExpOut);
 
     //call updateChart function to postion, size, and color the bars in the chart
-    updateChart(bars, csvData.length, colorScale, csvData, chart);
-
-    d3.select("svg.legendContainer").remove();
-    createLegend(csvData, expressedAttr);
+    updateChart(bars, csvData.length, colorScale, csvData, chart)
 
 };
 
@@ -431,7 +412,7 @@ function updateChart(bars, n, colorScale, csvData, chart) {
 
     //define new scaling values for the bars
     yScale
-        .range([493,0])
+        .range([503,0])
         .domain([0, d3.max(csvData, function(d) {
             return parseFloat(d[expressedAttr]) * 1.1;
         })]);
@@ -452,7 +433,7 @@ function updateChart(bars, n, colorScale, csvData, chart) {
         })
         //size or resize the bars
         .attr("height", function(d,i) {
-            return 493 - yScale(parseFloat(d[expressedAttr]));  /// now "503 -" that, was just that
+            return 503 - yScale(parseFloat(d[expressedAttr]));  /// now "503 -" that, was just that
         })
         .attr("y", function(d,i) {
             return yScale(parseFloat(d[expressedAttr])) + topBottomPadding; ///was: chartHeight - yScale(parseFloat(d[expressedAttr]))
@@ -546,59 +527,5 @@ function moveLabel() {
         .style("left", x + "px")
         .style("top", y + "px");
 };
-
-function createLegend(csvData, expressedAttr) {
-
-    //helpful resource: https://d3-legend.susielu.com/
-
-    //create labels for legend using color scale
-    var legendScale = d3.scaleThreshold()
-        .domain(legendClasses)
-        .range(colorClasses);
-
-    //add svg element to body for legend
-    legendContainer = d3.select("body")
-        .append("svg")
-        .attr("width", window.innerWidth*.43)
-        .attr("class", "legendContainer");
-
-    //add group elements to container to hold legend items
-    var legend = d3.select(".legendContainer")
-
-    legend.append("g")
-        .attr("class", "legend")
-        .attr("transform", "translate(20,20)"); //look into this more/change it
-
-    var colorLegend = d3.legendColor()
-        //.labelFormat(d3.format(".2f"))
-        .shapeWidth(window.innerWidth*.078)
-        .orient("horizontal")
-        .scale(legendScale)
-        .title(expressedAttr)
-        .labels(d3.legendHelpers.thresholdLabels);
-
-    legend.select(".legend")
-        .call(colorLegend);
-
-    console.log("legend created");
-};
-
-//failed attempt at making a title , everytime I changed a varible in the dropdown the svg would shift from the top right corner to the top left corner
-    //and also I just wasn't able to postion anything properly on the page, as well as not being able to add more than 1 line of text
-// function createTitle() {
-//
-//     var econTitle = d3.select("body")
-//         .append("svg")
-//         .attr("width", window.innerWidth * .5)
-//         .attr("height", 100)
-//         .attr("class", "econTitle")
-//
-//     var title = econTitle.append("text")
-//         .attr("x", 20)
-//         .attr("y", "50%")
-//         .attr("class", "title")
-//         .text("Economic Indicators in the European Union")
-// };
-
 
 })(); //last line of main.js, call the self-executing anonymous function
